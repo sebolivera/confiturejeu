@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+echo "🍓 Running pre-push checks..."
+just test
+just check-wasm
+
+echo "🚀 Pre-push checks passed. Ready for takeoff."

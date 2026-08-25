@@ -1,0 +1,59 @@
+[package]
+name = "confiturejeu"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95.0"
+description = "A Bevy game jam playground."
+authors = ["sebOlivera"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+publish = false
+
+[dependencies]
+bevy = "0.19.1"
+#bevy_rapier3d = "0.36.0" # For collisions, add back later.
+
+[features]
+default = []
+# Faster iterative builds + in-engine debug tooling. Never enable for releases.
+dev = ["bevy/dynamic_linking", "bevy/bevy_dev_tools", "bevy/file_watcher"]
+
+[lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+unused_qualifications = "warn"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+# Bevy idioms that fight the default pedantic/nursery lints.
+type_complexity = "allow"
+too_many_arguments = "allow"
+needless_pass_by_value = "allow"
+module_name_repetitions = "allow"
+cast_precision_loss = "allow"
+cast_possible_truncation = "allow"
+
+# Bevy is slow to build unoptimized; optimize dependencies even in debug.
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+# Keep debug builds of the game itself fast to link.
+[profile.dev.package.confiturejeu]
+opt-level = 1
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"
+
+# Small binaries for web/itch.io uploads.
+[profile.wasm-release]
+inherits = "release"
+opt-level = "s"
+strip = "debuginfo"
