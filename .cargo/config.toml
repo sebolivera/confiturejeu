@@ -1,0 +1,21 @@
+# Handy shorthands
+[alias]
+xtest = "nextest run --all-features --no-tests=pass"
+lint = "clippy --all-targets --all-features -- -D warnings"
+
+# Bevy links a lot of code; a fast linker cuts iteration time dramatically.
+# Uncomment the block for your platform after installing the linker
+# (Linux: `sudo apt install mold clang`, macOS: `brew install llvm`).
+#
+# [target.x86_64-unknown-linux-gnu]
+# linker = "clang"
+# rustflags = ["-C", "link-arg=-fuse-ld=/usr/bin/mold"]
+#
+# [target.aarch64-apple-darwin]
+# rustflags = ["-C", "link-arg=-fuse-ld=/opt/homebrew/opt/llvm/bin/ld64.lld"]
+#
+# [target.x86_64-pc-windows-msvc]
+# linker = "rust-lld.exe"
+
+[target.wasm32-unknown-unknown]
+runner = "wasm-server-runner"

@@ -1,0 +1,10 @@
+name: Linux build dependencies
+description: Installs the system libraries Bevy needs to build on Linux runners.
+
+runs:
+  using: composite
+  steps:
+    - uses: awalsh128/cache-apt-pkgs-action@v1
+      with:
+        packages: libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+        version: 1.0
