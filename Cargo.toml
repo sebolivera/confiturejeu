@@ -10,8 +10,9 @@ readme = "README.md"
 publish = false
 
 [dependencies]
+avian3d = "0.7.0"
 bevy = "0.19.1"
-#bevy_rapier3d = "0.36.0" # For collisions, add back later.
+
 
 [features]
 default = []

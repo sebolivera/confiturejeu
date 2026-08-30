@@ -1,5 +1,5 @@
 use crate::input_utils;
-use bevy::prelude::{App, Component, Plugin, Update};
+use bevy::prelude::{App, Component, IntoScheduleConfigs, Plugin, Update};
 
 /// Player resources.
 pub mod components;
@@ -10,7 +10,7 @@ pub mod movement;
 
 /// Player representation.
 #[derive(Debug, Component, Default, Copy, Clone)]
-#[require(components::RunSpeed)]
+#[require(components::PlayerDynamics, components::PlayerDimensions)]
 pub struct Player;
 
 /// Player plugin.
@@ -22,9 +22,14 @@ impl Plugin for PlayerPlugin {
             Update,
             (
                 movement::move_player_from_keyboard,
-                look::mouse_look,
-                input_utils::cursor::toggle_cursor,
-            ),
+                movement::apply_step_up,
+                movement::smooth_step_camera,
+            )
+                .chain(),
+        )
+        .add_systems(
+            Update,
+            (look::mouse_look, input_utils::cursor::toggle_cursor),
         );
     }
 }

@@ -13,5 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   configuration, `cargo-deny` policy, git hooks, CI and multi-platform release workflows.
 - Web (wasm) build pipeline with a size-optimized `wasm-release` profile.
 - `dev` cargo feature bundling dynamic linking, Bevy dev tools and asset hot-reload.
+- Basic physic system using `Avian3D`.
+
+### Changed
+
+
+### Fixed
+
 
 [Unreleased]: https://github.com/sebastianMindee/confiturejeu/compare/HEAD
