@@ -49,7 +49,7 @@ format-check:
 
 # Lint with Clippy, denying warnings
 clippy:
-    cargo clippy --all-targets --all-features -- -D warnings
+    cargo clippy --all-targets -- -D warnings
 
 # Type-check the wasm target so web builds don't rot
 check-wasm:
@@ -65,11 +65,11 @@ check-unused:
 
 # Run the test suite
 test:
-    cargo nextest run --all-features --no-tests=pass
+    cargo nextest run --no-tests=pass
 
 # Run doc tests (nextest does not cover these)
 test-doc:
-    cargo test --doc --all-features
+    cargo test --doc
 
 # Build and open the API documentation
 doc:

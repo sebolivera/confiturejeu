@@ -1,6 +1,6 @@
 //! Handles the player camera look.
 
-use crate::player::Player;
+use crate::player::components::PlayerCamera;
 use bevy::input::mouse::AccumulatedMouseMotion;
 use bevy::prelude::{
     Component, Deref, DerefMut, EulerRot, Quat, Res, Single, Transform, Vec2, With,
@@ -38,15 +38,18 @@ pub fn look_rotation(current: Quat, mouse_delta: Vec2, sensitivity: Vec2) -> Qua
 }
 
 /// Moves the player's camera based on mouse input.
+///
+/// The rotation is applied to the camera, not to the player body: the body is a
+/// dynamic rigid body whose `Transform` is owned by the physics solver.
 pub fn mouse_look(
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
-    player: Single<(&mut Transform, &CameraSensitivity), With<Player>>,
+    camera: Single<(&mut Transform, &CameraSensitivity), With<PlayerCamera>>,
     cursor: Single<&CursorOptions, With<PrimaryWindow>>,
 ) {
     if cursor.grab_mode != CursorGrabMode::Locked {
         return;
     }
-    let (mut transform, sensitivity) = player.into_inner();
+    let (mut transform, sensitivity) = camera.into_inner();
     let delta = accumulated_mouse_motion.delta;
 
     if delta != Vec2::ZERO {
