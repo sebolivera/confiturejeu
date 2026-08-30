@@ -1,5 +1,6 @@
 use crate::input_utils;
-use bevy::prelude::{App, Component, IntoScheduleConfigs, Plugin, Update};
+use crate::state::GameState;
+use bevy::prelude::{App, Component, IntoScheduleConfigs, Plugin, Update, in_state};
 
 /// Player resources.
 pub mod components;
@@ -25,11 +26,13 @@ impl Plugin for PlayerPlugin {
                 movement::apply_step_up,
                 movement::smooth_step_camera,
             )
-                .chain(),
+                .chain()
+                .run_if(in_state(GameState::Game)),
         )
         .add_systems(
             Update,
-            (look::mouse_look, input_utils::cursor::toggle_cursor),
+            (look::mouse_look, input_utils::cursor::toggle_cursor)
+                .run_if(in_state(GameState::Game)),
         );
     }
 }

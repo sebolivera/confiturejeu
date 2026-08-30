@@ -17,7 +17,7 @@ pub fn toggle_cursor(
             cursor.grab_mode = CursorGrabMode::None;
             cursor.visible = true;
         }
-    } else if input.just_pressed(KeyCode::Escape) {
+    } else if input.just_pressed(KeyCode::Tab) {
         cursor.grab_mode = CursorGrabMode::None;
         cursor.visible = true;
     }
