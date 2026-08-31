@@ -19,8 +19,16 @@ use crate::settings::{DisplayQuality, Volume};
 use crate::state::GameState;
 use crate::world::{GRAVITY, scene, spawn_obstacles};
 use avian3d::PhysicsPlugins;
-use avian3d::prelude::Gravity;
+use avian3d::prelude::{Gravity, Physics, PhysicsTime};
 use bevy::prelude::*;
+
+fn pause_physics(mut time: ResMut<Time<Physics>>) {
+    time.pause();
+}
+
+fn unpause_physics(mut time: ResMut<Time<Physics>>) {
+    time.unpause();
+}
 
 /// Builds the app and runs the game until the window is closed.
 pub fn run() {
@@ -40,6 +48,9 @@ pub fn run() {
             Startup,
             (scene.spawn(), spawn_obstacles, debug::setup_stats_ui),
         )
+        .add_systems(Startup, pause_physics)
+        .add_systems(OnEnter(GameState::Game), unpause_physics)
+        .add_systems(OnExit(GameState::Game), pause_physics)
         .add_systems(
             Update,
             debug::update_stats_ui.after(player::movement::move_player_from_keyboard),

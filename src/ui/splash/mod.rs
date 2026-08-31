@@ -1,6 +1,7 @@
 use bevy::prelude::{
-    AlignItems, AssetServer, Commands, Component, Deref, DerefMut, ImageNode, JustifyContent, Node,
-    Res, Resource, Timer, TimerMode, children, default, percent, px,
+    AlignItems, AssetServer, BackgroundColor, Color, Commands, Component, Deref, DerefMut,
+    ImageNode, JustifyContent, Node, Res, Resource, Timer, TimerMode, children, default, percent,
+    px,
 };
 
 /// Plugin for the splash screen
@@ -25,6 +26,7 @@ pub fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             height: percent(100),
             ..default()
         },
+        BackgroundColor(Color::BLACK),
         OnSplashScreen,
         children![(
             ImageNode::new(icon),
