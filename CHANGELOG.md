@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Web (wasm) build pipeline with a size-optimized `wasm-release` profile.
 - `dev` cargo feature bundling dynamic linking, Bevy dev tools and asset hot-reload.
 - Basic physic system using `Avian3D`.
+- Menus
+
+### Fixed
+
 
 ### Changed
 

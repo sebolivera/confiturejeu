@@ -78,7 +78,7 @@ pub fn scene() -> impl SceneList {
         (
             #Player
             Player
-            Transform::from_xyz(0.0, 0.85, 0.0)
+            Transform::from_xyz(0.0, 0.85, 4.0)
             Visibility::default()
             RigidBody::from(RigidBody::Dynamic)
             Collider::capsule(0.3, 1.1)
