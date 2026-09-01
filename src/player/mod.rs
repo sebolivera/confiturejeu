@@ -2,7 +2,8 @@ use crate::input_utils;
 use crate::state::GameState;
 use avian3d::prelude::LinearVelocity;
 use bevy::prelude::{
-    App, Component, IntoScheduleConfigs, OnExit, Plugin, Single, Update, With, in_state,
+    App, Component, FixedUpdate, IntoScheduleConfigs, OnExit, Plugin, Single, Update, With,
+    in_state,
 };
 
 /// Player resources.
@@ -29,14 +30,14 @@ fn halt_player(mut linear_velocity: Single<&mut LinearVelocity, With<Player>>) {
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            Update,
-            (
-                movement::move_player_from_keyboard,
-                movement::apply_step_up,
-                movement::smooth_step_camera,
-            )
+            FixedUpdate,
+            (movement::move_player_from_keyboard, movement::apply_step_up)
                 .chain()
                 .run_if(in_state(GameState::Game)),
+        )
+        .add_systems(
+            Update,
+            (movement::buffer_jump, movement::smooth_step_camera).run_if(in_state(GameState::Game)),
         )
         .add_systems(
             Update,

@@ -51,9 +51,6 @@ pub fn run() {
         .add_systems(Startup, pause_physics)
         .add_systems(OnEnter(GameState::Game), unpause_physics)
         .add_systems(OnExit(GameState::Game), pause_physics)
-        .add_systems(
-            Update,
-            debug::update_stats_ui.after(player::movement::move_player_from_keyboard),
-        )
+        .add_systems(Update, debug::update_stats_ui)
         .run();
 }
