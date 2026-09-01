@@ -2,7 +2,10 @@
 
 use crate::player::Player;
 use crate::player::components::{CameraRig, PlayerCamera, PlayerDimensions, PlayerDynamics};
-use avian3d::prelude::{LinearVelocity, Position, SpatialQuery, SpatialQueryFilter};
+use avian3d::prelude::{
+    Collider, LinearVelocity, Position, RayHitData, ShapeCastConfig, ShapeHitData, SpatialQuery,
+    SpatialQueryFilter,
+};
 use bevy::prelude::{
     ButtonInput, Dir3, Entity, KeyCode, Quat, Res, Single, Time, Transform, Vec2, Vec3, With,
 };
@@ -24,7 +27,11 @@ const STEP_SKIN: f32 = 0.02;
 /// Smallest upward normal component still considered walkable ground.
 pub(crate) const MIN_WALKABLE_NORMAL_Y: f32 = 0.7;
 /// How fast the camera catches up after the body is lifted onto a step.
-const STEP_SMOOTH_SPEED: f32 = 6.0;
+const STEP_SMOOTH_SPEED: f32 = 8.0;
+/// Highest upward speed still treated as resting on the ground. Contact
+/// resolution can leave a tiny upward velocity, which must not break the
+/// ground snap; a real jump is far above this.
+const MAX_GROUNDED_RISE_SPEED: f32 = 0.5;
 
 /// The player's movement intent for one frame, decoupled from any input device.
 #[derive(Debug, Default, Clone, Copy)]
@@ -89,7 +96,8 @@ pub(crate) fn move_player_from_keyboard(
     player: Single<
         (
             Entity,
-            &Transform,
+            &Position,
+            &Collider,
             &mut LinearVelocity,
             &mut PlayerDynamics,
             &PlayerDimensions,
@@ -99,30 +107,54 @@ pub(crate) fn move_player_from_keyboard(
     camera: Single<&Transform, With<PlayerCamera>>,
     spatial_query: SpatialQuery,
 ) {
-    let (entity, transform, mut linear_velocity, mut dynamics, dimensions) = player.into_inner();
-    let intent = MoveIntent::from_keyboard(&keys);
+    let (entity, position, collider, mut linear_velocity, mut dynamics, dimensions) =
+        player.into_inner();
+    let mut intent = MoveIntent::from_keyboard(&keys);
+    intent.jump |= core::mem::take(&mut dynamics.jump_buffered);
     let target_velocity = movement_velocity(camera.rotation, intent, dynamics.multiplier);
-    let origin = transform.translation;
+    let origin = position.0;
 
     linear_velocity.x = target_velocity.x;
     linear_velocity.z = target_velocity.z;
 
-    let ground_normal = ground_normal(&spatial_query, entity, origin, *dimensions);
+    let contact = ground_hit(&spatial_query, entity, origin, *dimensions, GROUND_PROBE);
+    let snap = if contact.is_none()
+        && dynamics.grounded
+        && !intent.jump
+        && linear_velocity.y < MAX_GROUNDED_RISE_SPEED
+    {
+        snap_to_ground(&spatial_query, entity, collider, origin)
+    } else {
+        None
+    };
+    let grounded = contact.is_some() || snap.is_some();
 
-    if ground_normal.is_some() && linear_velocity.y <= 0.0 {
+    if grounded && linear_velocity.y < MAX_GROUNDED_RISE_SPEED {
         dynamics.coyote_timer = 0.0;
     } else {
         dynamics.coyote_timer += time.delta_secs();
     }
 
-    if let Some(normal) = ground_normal {
+    if let Some(hit) = contact {
         linear_velocity.y = linear_velocity
             .y
-            .min(max_ground_rise(normal, target_velocity.length()));
-
-        dynamics.pending_step =
-            step_rise(&spatial_query, entity, origin, *dimensions, target_velocity).unwrap_or(0.0);
+            .min(max_ground_rise(hit.normal, target_velocity.length()));
     }
+
+    if grounded {
+        let rise = step_rise(&spatial_query, entity, origin, *dimensions, target_velocity);
+
+        dynamics.pending_step = match (rise, snap) {
+            (Some(rise), _) => rise,
+            (None, Some(hit)) => {
+                linear_velocity.y = 0.0;
+                -hit.distance
+            }
+            (None, None) => 0.0,
+        };
+    }
+
+    dynamics.grounded = grounded;
 
     if intent.jump && dynamics.coyote_timer < COYOTE_TIME {
         linear_velocity.y = JUMP_SPEED;
@@ -130,7 +162,19 @@ pub(crate) fn move_player_from_keyboard(
     }
 }
 
-/// Lifts the player onto a detected step and makes the camera trail the jump.
+/// Records jump presses at render rate so the fixed-timestep movement system
+/// never misses or duplicates one.
+pub(crate) fn buffer_jump(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut dynamics: Single<&mut PlayerDynamics, With<Player>>,
+) {
+    if keys.just_pressed(KeyCode::Space) {
+        dynamics.jump_buffered = true;
+    }
+}
+
+/// Applies the pending vertical adjustment (step-up lift or ground snap) and
+/// makes the camera trail the jump smoothly.
 pub(crate) fn apply_step_up(
     player: Single<(&mut Position, &mut PlayerDynamics), With<Player>>,
     rig: Single<&mut CameraRig, With<PlayerCamera>>,
@@ -138,7 +182,7 @@ pub(crate) fn apply_step_up(
     let (mut position, mut dynamics) = player.into_inner();
     let rise = core::mem::take(&mut dynamics.pending_step);
 
-    if rise > 0.0 {
+    if rise != 0.0 {
         position.y += rise;
         rig.into_inner().step_offset -= rise;
     }
@@ -222,24 +266,45 @@ fn step_rise(
     (rise > STEP_SKIN).then_some(rise + STEP_SKIN)
 }
 
-/// Returns the normal of the ground under the player, or [`None`] if airborne.
-fn ground_normal(
+/// Returns the ground hit under the player within `probe` below the feet, or
+/// [`None`] if airborne.
+fn ground_hit(
     spatial_query: &SpatialQuery,
     entity: Entity,
     origin: Vec3,
     dimensions: PlayerDimensions,
-) -> Option<Vec3> {
-    let cast_length = dimensions.height.mul_add(0.5, GROUND_PROBE);
+    probe: f32,
+) -> Option<RayHitData> {
+    let cast_length = dimensions.height.mul_add(0.5, probe);
 
-    spatial_query
-        .cast_ray(
-            origin,
-            Dir3::NEG_Y,
-            cast_length,
-            true,
-            &SpatialQueryFilter::from_excluded_entities([entity]),
-        )
-        .map(|hit| hit.normal)
+    spatial_query.cast_ray(
+        origin,
+        Dir3::NEG_Y,
+        cast_length,
+        true,
+        &SpatialQueryFilter::from_excluded_entities([entity]),
+    )
+}
+
+/// Casts the player capsule downwards and returns the ground it would land on
+/// within [`MAX_STEP_HEIGHT`], or [`None`] if it is further below.
+fn snap_to_ground(
+    spatial_query: &SpatialQuery,
+    entity: Entity,
+    collider: &Collider,
+    origin: Vec3,
+) -> Option<ShapeHitData> {
+    spatial_query.cast_shape(
+        collider,
+        origin,
+        Quat::IDENTITY,
+        Dir3::NEG_Y,
+        &ShapeCastConfig {
+            max_distance: MAX_STEP_HEIGHT,
+            ..ShapeCastConfig::default()
+        },
+        &SpatialQueryFilter::from_excluded_entities([entity]),
+    )
 }
 
 #[cfg(test)]

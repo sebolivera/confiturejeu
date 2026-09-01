@@ -29,8 +29,13 @@ pub struct PlayerDynamics {
     pub multiplier: f32,
     /// Time since the player was last grounded.
     pub coyote_timer: f32,
-    /// Height the player must be lifted by to clear the step ahead.
+    /// Signed vertical adjustment to apply: positive lifts the player onto a
+    /// step, negative snaps them down onto the ground.
     pub pending_step: f32,
+    /// Whether the player was standing on the ground last frame.
+    pub grounded: bool,
+    /// Jump press recorded at render rate, waiting for the next physics tick.
+    pub jump_buffered: bool,
 }
 
 impl Default for PlayerDynamics {
@@ -39,6 +44,8 @@ impl Default for PlayerDynamics {
             multiplier: 1.5,
             coyote_timer: 0.0,
             pending_step: 0.0,
+            grounded: false,
+            jump_buffered: false,
         }
     }
 }

@@ -14,7 +14,7 @@ use bevy::prelude::{
 pub(crate) const GRAVITY: Vec3 = Vec3::new(0.0, -20.0, 0.0);
 
 /// Number of steps in the test staircase.
-const STAIR_STEPS: u8 = 10;
+const STAIR_STEPS: u8 = 50;
 /// Vertical rise of a single step.
 const STAIR_RISE: f32 = 0.2;
 /// Horizontal depth of a single step.
