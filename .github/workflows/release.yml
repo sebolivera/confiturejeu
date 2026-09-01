@@ -38,7 +38,7 @@ jobs:
             os: macos-latest
             target: aarch64-apple-darwin
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
@@ -64,7 +64,7 @@ jobs:
           [ -d assets ] && cp -r assets package/ || true
           [ -f README.md ] && cp README.md package/ || true
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ env.BINARY }}-${{ matrix.name }}
           path: package/
@@ -73,7 +73,7 @@ jobs:
     name: web-wasm
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
@@ -95,7 +95,7 @@ jobs:
           [ -d assets ] && cp -r assets ./dist/ || true
           cp web/index.html ./dist/index.html
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ env.BINARY }}-web
           path: dist/
