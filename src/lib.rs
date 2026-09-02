@@ -3,6 +3,8 @@
 /// Debug utilities.
 pub mod debug;
 pub mod input_utils;
+/// Hexagonal level grid.
+pub mod level;
 /// Player.
 pub mod player;
 /// Game settings.
