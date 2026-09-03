@@ -46,3 +46,7 @@ $RECYCLE.BIN/
 
 # Tools
 .rtk
+
+# Misc
+/local_notes
+/local_test

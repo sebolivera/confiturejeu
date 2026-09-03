@@ -35,6 +35,15 @@ impl Room {
     pub fn open_directions(&self) -> impl Iterator<Item = Direction> + '_ {
         Direction::ALL.into_iter().filter(|dir| self.is_open(*dir))
     }
+
+    /// Default constructor.
+    pub fn new(kind: RoomKind, coords: Coordinates, openings: u8) -> Self {
+        Room {
+            kind,
+            coords,
+            openings,
+        }
+    }
 }
 
 #[cfg(test)]

@@ -2,7 +2,7 @@ use crate::level::Direction;
 use bevy::prelude::Vec3;
 
 /// Distance from the centre of a hex to one of its corners, in world units.
-pub const HEX_RADIUS: f32 = 30.0;
+pub const HEX_RADIUS: f32 = 17.0;
 
 /// Vertical distance between two floors, in world units.
 pub const FLOOR_HEIGHT: f32 = 30.0;

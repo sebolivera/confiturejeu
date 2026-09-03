@@ -1,13 +1,17 @@
 /// Hexagonal coordinates module
 pub mod coordinates;
+pub mod generation;
+pub mod level_config;
 /// Hexagonal room module
 pub mod room;
 
 use crate::level::coordinates::Coordinates;
 use crate::level::room::Room;
+use rand::{Rng, RngExt};
 use std::collections::HashMap;
 
 /// Level of hexagonal rooms
+#[derive(Debug)]
 pub struct Level {
     /// Rooms in a level
     pub rooms: HashMap<Coordinates, Room>,
@@ -20,11 +24,6 @@ impl Level {
         Self {
             rooms: HashMap::new(),
         }
-    }
-
-    /// Populates the level with rooms
-    pub fn populate(&mut self) {
-        todo!()
     }
 
     /// Adds a room, keyed by its own coordinates so the map key and
@@ -41,13 +40,6 @@ impl Default for Level {
 }
 
 /// Hexagonal "directions" for rooms.
-///
-/// Ordered clockwise on screen, starting from north-east. The discriminant doubles as the
-/// bit index into [`Room::openings`](crate::level::room::Room::openings)
-/// and as the index into [`Coordinates::neighbors`](crate::level::coordinates::Coordinates::neighbors).
-///
-/// Compass names assume the pointy-top layout of [`Vec3::from`] on `Coordinates`: `+x` is east
-/// and `-z` is north.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Direction {
     /// Towards `+x`, `-z`.
@@ -143,13 +135,6 @@ mod tests {
         assert_eq!(level.rooms.len(), 1);
         assert_eq!(level.rooms.get(&coords).map(|r| r.coords), Some(coords));
         assert!(!level.rooms.contains_key(&Coordinates::new(0, 0, 0)));
-    }
-
-    /// Documents that population is not implemented yet; delete once it is.
-    #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn populate_is_still_a_todo() {
-        Level::new().populate();
     }
 
     #[test]
