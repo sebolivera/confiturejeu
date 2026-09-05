@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `dev` cargo feature bundling dynamic linking, Bevy dev tools and asset hot-reload.
 - Basic physic system using `Avian3D`.
 - Menus
+- Level visualization: pure `level_to_svg` dumps (`generate --svg`) and a gizmo-based
+  top-down `level_viewer` binary (`just viewer`) with pan/zoom, floor switching and reseed.
 
 ### Fixed
 

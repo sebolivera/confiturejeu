@@ -15,6 +15,10 @@ run:
 run-release:
     cargo run --release
 
+# Fly over generated levels top-down (R reseed, PgUp/PgDn floor, arrows pan, +/- zoom)
+viewer seed="":
+    cargo run --bin level_viewer --features dev -- {{ seed }}
+
 # Build a debug binary
 build:
     cargo build

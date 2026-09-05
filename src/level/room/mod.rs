@@ -37,8 +37,9 @@ impl Room {
     }
 
     /// Default constructor.
-    pub fn new(kind: RoomKind, coords: Coordinates, openings: u8) -> Self {
-        Room {
+    #[must_use]
+    pub const fn new(kind: RoomKind, coords: Coordinates, openings: u8) -> Self {
+        Self {
             kind,
             coords,
             openings,

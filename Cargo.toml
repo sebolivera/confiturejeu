@@ -15,6 +15,10 @@ bevy = "0.19.1"
 rand = "0.10.2"
 rand_chacha = "0.10.0"
 
+# rand's entropy source; wasm32-unknown-unknown needs the JS backend opted in.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.4", features = ["wasm_js"] }
+
 
 [features]
 default = []

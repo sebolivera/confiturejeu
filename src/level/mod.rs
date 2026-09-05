@@ -1,13 +1,14 @@
 /// Hexagonal coordinates module
 pub mod coordinates;
+/// Procedural level generation.
 pub mod generation;
-pub mod level_config;
 /// Hexagonal room module
 pub mod room;
+/// SVG dumps of levels for fast generator iteration.
+pub mod svg;
 
 use crate::level::coordinates::Coordinates;
 use crate::level::room::Room;
-use rand::{Rng, RngExt};
 use std::collections::HashMap;
 
 /// Level of hexagonal rooms
