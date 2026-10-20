@@ -1,5 +1,6 @@
 /// Config for level generation.
 pub mod gen_config;
+mod spacing;
 
 use crate::level::coordinates::Coordinates;
 use crate::level::generation::gen_config::GenConfig;

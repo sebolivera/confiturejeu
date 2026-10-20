@@ -1,3 +1,5 @@
+use crate::level::generation::spacing::Spacing;
+
 /// Config for level generation.
 pub struct GenConfig {
     /// Rooms on the critical path (entrance → boss). Always hit exactly.
@@ -6,10 +8,17 @@ pub struct GenConfig {
     pub branch_count: usize,
     /// Rooms per branch; each tip becomes a treasure room.
     pub branch_len: std::ops::RangeInclusive<usize>,
+    /// Minimum rooms per branch.
+    pub min_branch_len: usize,
     /// Relative weight of a 0° / 60° / 120° / 180° turn from the current
     /// heading at each step. A heavy straight weight makes paths snake
     /// outward; flatter weights let them curl up into a blob.
     pub turn_weights: [u32; 4],
+    /// Relative weight of a step that drifts away from the current heading.
+    /// 0.5; 0.0 = off
+    pub drift_weight: u32,
+    ///
+    pub spacing: Spacing,
     /// Chance a step goes up/down instead of sideways.
     pub floor_change_chance: f32,
     /// Max floors.
@@ -22,7 +31,10 @@ impl Default for GenConfig {
             main_path_len: 100,
             branch_count: 10,
             branch_len: 3..=5,
+            min_branch_len: 2,
             turn_weights: [8, 3, 1, 0],
+            drift_weight: 0,
+            spacing: Spacing::Soft,
             floor_change_chance: 0.1,
             max_floors: 3,
         }
@@ -36,7 +48,10 @@ impl GenConfig {
         main_path_len: usize,
         branch_count: usize,
         branch_len: std::ops::RangeInclusive<usize>,
+        min_branch_len: usize,
         turn_weights: [u32; 4],
+        drift_weight: u32,
+        spacing: Spacing,
         floor_change_chance: f32,
         max_floors: u8,
     ) -> Self {
@@ -44,7 +59,10 @@ impl GenConfig {
             main_path_len,
             branch_count,
             branch_len,
+            min_branch_len,
             turn_weights,
+            drift_weight,
+            spacing,
             floor_change_chance,
             max_floors,
         }
